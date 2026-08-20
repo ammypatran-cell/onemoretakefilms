@@ -1,0 +1,11 @@
+# scratch output from the image tooling
+full_*/
+batch/
+ig/
+
+# OS / editor noise
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

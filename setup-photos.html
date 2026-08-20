@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Photo Setup — One More Take Films</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--ink:#0b0b0c;--smoke:#17171a;--line:rgba(255,255,255,.12);--gold:#e0ac4e;--fog:#9d9a94;--white:#f7f6f4}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--white);font-family:Inter,system-ui,sans-serif;font-weight:300;line-height:1.65;padding:2.5rem 1.5rem 5rem}
+  .wrap{width:min(1100px,100%);margin-inline:auto}
+  h1{font-family:Anton,sans-serif;font-size:clamp(1.8rem,5vw,3rem);text-transform:uppercase;letter-spacing:-.01em;line-height:1}
+  h1 em{font-style:normal;color:var(--gold)}
+  .sub{color:#b6b2ac;max-width:70ch;margin:.9rem 0 .4rem}
+  .note{color:var(--fog);font-size:.85rem;max-width:70ch}
+  .bar{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;margin:2rem 0 1.5rem;padding:1rem 1.2rem;border:1px solid var(--line);border-radius:12px;background:var(--smoke)}
+  .bar b{font-size:.85rem;font-weight:500}
+  .bar span{color:var(--fog);font-size:.8rem}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:none;color:var(--white);border-radius:999px;padding:.55rem 1.15rem;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;transition:.25s}
+  button:hover:not(:disabled){background:var(--white);color:var(--ink);border-color:var(--white)}
+  button.go{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:600}
+  button.go:hover:not(:disabled){background:var(--white);border-color:var(--white)}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin-top:1.5rem}
+  .slot{border:1px solid var(--line);border-radius:12px;background:var(--smoke);overflow:hidden;display:flex;flex-direction:column}
+  .slot.filled{border-color:rgba(224,172,78,.5)}
+  .slot.over{border-color:var(--gold);background:#1f1c16}
+  .drop{position:relative;aspect-ratio:4/3;display:grid;place-items:center;text-align:center;padding:1rem;cursor:pointer;background:repeating-linear-gradient(45deg,#141416 0 12px,#101012 12px 24px);border-bottom:1px solid var(--line)}
+  .drop canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+  .slot.filled .drop canvas{display:block}
+  .slot.filled .drop .hint{display:none}
+  .hint{color:#6d6a66;font-size:.72rem;letter-spacing:.08em;pointer-events:none}
+  .hint b{display:block;color:#8d8983;font-size:.8rem;margin-bottom:.25rem;font-weight:500}
+  .info{padding:.85rem 1rem;display:flex;flex-direction:column;gap:.2rem}
+  .info .fn{font-size:.82rem;font-weight:500;letter-spacing:.02em}
+  .info .desc{font-size:.72rem;color:var(--fog)}
+  .info .size{font-size:.68rem;color:var(--gold);min-height:1rem;letter-spacing:.06em}
+  .row{display:flex;gap:.4rem;padding:0 1rem 1rem}
+  .row button{flex:1;padding:.45rem .6rem;font-size:.68rem}
+  .steps{border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.6rem;margin-top:2.5rem;background:var(--smoke)}
+  .steps h2{font-family:Anton,sans-serif;font-size:1.1rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.8rem;font-weight:400}
+  .steps ol{margin-left:1.2rem;font-size:.88rem;color:#b6b2ac}
+  .steps li{margin-bottom:.45rem}
+  .steps code{background:#000;padding:.12rem .4rem;border-radius:4px;color:var(--gold);font-size:.85em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Photo <em>Setup</em></h1>
+  <p class="sub">
+    Drop a photo onto any slot below. It gets cropped to the right shape, resized, and compressed for the
+    web — then you download it already named correctly. Save it into <code style="color:var(--gold)">assets/img/</code>
+    and it's live on the site.
+  </p>
+  <p class="note">Everything happens inside your browser. Nothing is uploaded anywhere.</p>
+
+  <div class="bar">
+    <b id="count">0 of 13 slots filled</b>
+    <span id="tally"></span>
+    <span style="flex:1"></span>
+    <label style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--fog)">
+      Quality
+      <input type="range" id="q" min="60" max="95" value="82" style="accent-color:var(--gold)" />
+      <span id="qv" style="color:var(--gold);min-width:2.2rem">82%</span>
+    </label>
+    <button class="go" id="all" disabled>Download all</button>
+  </div>
+
+  <div class="slots" id="slots"></div>
+
+  <div class="steps">
+    <h2>What to do with the files</h2>
+    <ol>
+      <li>Download each one (or hit <b>Download all</b>).</li>
+      <li>Move them from your Downloads folder into <code>demo\assets\img\</code>.</li>
+      <li>Open <code>index.html</code> and refresh — the placeholders are replaced by the real photos.</li>
+    </ol>
+    <p class="note" style="margin-top:.9rem">
+      Tip: use his original camera files rather than photos saved off Instagram — Instagram re-compresses
+      everything, and it shows badly on the full-screen hero image.
+    </p>
+  </div>
+
+</div>
+
+<script>
+const SLOTS = [
+  {f:'hero.jpg',     w:1920, h:1080, d:'Full-screen background at the top'},
+  {f:'about-1.jpg',  w:900,  h:1200, d:'About — big portrait frame'},
+  {f:'about-2.jpg',  w:1200, h:900,  d:'About — small behind-the-scenes frame'},
+  {f:'work-01.jpg',  w:900,  h:1500, d:'Films grid — song shoot (tall)'},
+  {f:'work-02.jpg',  w:1200, h:900,  d:'Films grid — wedding film'},
+  {f:'work-03.jpg',  w:1200, h:900,  d:'Films grid — mehndi / haldi'},
+  {f:'work-04.jpg',  w:1600, h:600,  d:'Films grid — dance floor (wide)'},
+  {f:'work-05.jpg',  w:1200, h:900,  d:'Films grid — makeup / getting ready'},
+  {f:'work-06.jpg',  w:900,  h:1500, d:'Films grid — pre-wedding (tall)'},
+  {f:'art-01.jpg',   w:900,  h:1200, d:'Art strip — pencil sketch'},
+  {f:'art-02.jpg',   w:900,  h:1200, d:'Art strip — colour painting'},
+  {f:'art-03.jpg',   w:900,  h:1200, d:'Art strip — work in progress'},
+  {f:'art-04.jpg',   w:900,  h:1200, d:'Art strip — finished commission'},
+  {f:'og-cover.jpg', w:1200, h:630,  d:'Link preview when shared on WhatsApp'}
+];
+
+const wrap = document.getElementById('slots');
+const state = {};
+let quality = 0.82;
+
+SLOTS.forEach((s, i) => {
+  const el = document.createElement('div');
+  el.className = 'slot';
+  el.innerHTML = `
+    <div class="drop" data-i="${i}">
+      <canvas></canvas>
+      <div class="hint"><b>Drop photo here</b>${s.w} × ${s.h}<br>or click to choose</div>
+    </div>
+    <div class="info">
+      <span class="fn">${s.f}</span>
+      <span class="desc">${s.d}</span>
+      <span class="size"></span>
+    </div>
+    <div class="row">
+      <button data-dl="${i}" disabled>Download</button>
+      <button data-clr="${i}" disabled>Clear</button>
+    </div>`;
+  wrap.appendChild(el);
+
+  const drop = el.querySelector('.drop');
+  const input = Object.assign(document.createElement('input'), {type:'file', accept:'image/*'});
+  input.style.display = 'none';
+  el.appendChild(input);
+
+  drop.addEventListener('click', () => input.click());
+  input.addEventListener('change', e => e.target.files[0] && load(i, e.target.files[0]));
+
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); el.classList.add('over');
+  }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); el.classList.remove('over');
+  }));
+  drop.addEventListener('drop', e => {
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) load(i, f);
+  });
+
+  el.querySelector(`[data-dl="${i}"]`).addEventListener('click', () => save(i));
+  el.querySelector(`[data-clr="${i}"]`).addEventListener('click', () => clear(i));
+});
+
+function load(i, file) {
+  const s = SLOTS[i], img = new Image();
+  img.onload = () => { state[i] = img; render(i); };
+  img.onerror = () => alert('Could not read that image file.');
+  img.src = URL.createObjectURL(file);
+}
+
+function render(i) {
+  const s = SLOTS[i], img = state[i];
+  if (!img) return;
+  const slot = wrap.children[i];
+  const cv = slot.querySelector('canvas');
+  cv.width = s.w; cv.height = s.h;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+
+  // cover-crop: fill the frame, centre the overflow
+  const scale = Math.max(s.w / img.width, s.h / img.height);
+  const dw = img.width * scale, dh = img.height * scale;
+  ctx.drawImage(img, (s.w - dw) / 2, (s.h - dh) / 2, dw, dh);
+
+  slot.classList.add('filled');
+  slot.querySelector(`[data-dl="${i}"]`).disabled = false;
+  slot.querySelector(`[data-clr="${i}"]`).disabled = false;
+
+  cv.toBlob(b => {
+    const kb = Math.round(b.size / 1024);
+    slot.querySelector('.size').textContent =
+      `${s.w}×${s.h} · ${kb} KB` + (kb > 400 ? ' — try lower quality' : ' ✓');
+  }, 'image/jpeg', quality);
+
+  tally();
+}
+
+function save(i) {
+  const cv = wrap.children[i].querySelector('canvas');
+  cv.toBlob(b => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = SLOTS[i].f;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }, 'image/jpeg', quality);
+}
+
+function clear(i) {
+  delete state[i];
+  const slot = wrap.children[i];
+  slot.classList.remove('filled');
+  slot.querySelector('.size').textContent = '';
+  slot.querySelector(`[data-dl="${i}"]`).disabled = true;
+  slot.querySelector(`[data-clr="${i}"]`).disabled = true;
+  tally();
+}
+
+function tally() {
+  const n = Object.keys(state).length;
+  document.getElementById('count').textContent = `${n} of ${SLOTS.length} slots filled`;
+  document.getElementById('all').disabled = n === 0;
+  document.getElementById('tally').textContent =
+    n === SLOTS.length ? '— all done, download them' : (n ? '— keep going' : '');
+}
+
+document.getElementById('all').addEventListener('click', () => {
+  // stagger so the browser doesn't block a burst of downloads
+  Object.keys(state).forEach((i, n) => setTimeout(() => save(+i), n * 350));
+});
+
+const q = document.getElementById('q');
+q.addEventListener('input', () => {
+  quality = q.value / 100;
+  document.getElementById('qv').textContent = q.value + '%';
+  Object.keys(state).forEach(i => render(+i));
+});
+
+tally();
+</script>
+</body>
+</html>
