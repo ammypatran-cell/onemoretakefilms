@@ -36,9 +36,14 @@ body{
   overflow-x:hidden;
 }
 img{display:block;max-width:100%;height:auto}
-/* <picture> is only a wrapper for the webp source — take it out of layout
-   so every rule below can target the <img> exactly as before. */
-picture{display:contents}
+/* <picture> wraps the webp source. It must stay a REAL box: the images below
+   size with height:100%, and a percentage height can only resolve against a
+   parent that actually has one. display:contents removes that parent — which
+   iOS Safari resolves to zero, collapsing the image to nothing. */
+picture{display:block}
+.hero__media picture,
+.frame picture,
+.card__media picture{position:absolute;inset:0}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 ul{list-style:none}
