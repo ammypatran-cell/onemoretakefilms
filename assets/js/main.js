@@ -101,7 +101,12 @@
     ticking = false;
   }
 
-  if (!reduced && parallaxEls.length) {
+  // Parallax is a pointer-device luxury: on phones it fights native
+  // scroll and costs battery for an effect nobody can hover to notice.
+  var wantsParallax = window.matchMedia('(min-width: 761px)').matches &&
+                      window.matchMedia('(hover: hover)').matches;
+
+  if (!reduced && wantsParallax && parallaxEls.length) {
     window.addEventListener('scroll', function () {
       if (!ticking) { window.requestAnimationFrame(parallax); ticking = true; }
     }, { passive: true });

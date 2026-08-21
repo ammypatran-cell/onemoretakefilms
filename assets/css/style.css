@@ -566,3 +566,59 @@ section{padding:clamp(4.5rem,10vw,9rem) 0;position:relative}
   .hero__title em{opacity:1}
   .grain{display:none}
 }
+
+/* =========================================================
+   TOUCH DEVICES
+   A phone never fires :hover, so anything revealed on hover is
+   simply unreachable there. Everything below is the hover state,
+   made the resting state for touch.
+   ========================================================= */
+@media (hover:none){
+  /* photos were staying grey and dimmed — that's the hover-only bit */
+  .card__media img{filter:grayscale(0) brightness(.82)}
+  .card__meta{transform:none}
+  .card__meta p{opacity:1;max-height:none}
+
+  /* art captions were parked off the bottom edge, never seen */
+  .art__item figcaption{
+    transform:none;
+    background:linear-gradient(transparent,rgba(20,18,16,.92));
+    padding:2.6rem .9rem .85rem;
+  }
+  .art__item::after{border-color:rgba(194,96,58,.25)}
+
+  /* kill lifts/nudges that only make sense with a pointer */
+  .btn:hover,.person:hover,.ccard:hover{transform:none}
+  .svc__row:hover{padding-inline:.4rem}
+}
+
+/* =========================================================
+   PHONE LAYOUT
+   ========================================================= */
+@media (max-width:760px){
+  /* tighter vertical rhythm — desktop spacing wastes a phone screen */
+  section{padding:clamp(3.4rem,9vw,4.6rem) 0}
+  .hero{padding:6.5rem var(--pad) 4.5rem;min-height:94svh}
+  .hero__tag{margin-bottom:1.9rem}
+  .hero__scroll{display:none}          /* collided with the buttons */
+
+  /* full-width CTAs are far easier to hit than side-by-side pills */
+  .hero__actions{gap:.65rem}
+  .hero__actions .btn{flex:1 1 100%;justify-content:center}
+
+  /* tap targets: these were ~34px, below the 44px guideline */
+  .chip{padding:.72rem 1.25rem}
+  .filters{gap:.45rem}
+  .nav__links a{padding-block:.55rem}
+  .btn{padding:1.05rem 1.8rem}
+
+  .art__strip{margin:2.2rem 0;gap:.55rem}
+  .art__item figcaption{font-size:.6rem;letter-spacing:.14em}
+  .foot__in{gap:.6rem}
+}
+
+/* very small phones */
+@media (max-width:380px){
+  .art__strip{grid-template-columns:1fr}
+  .hero__title{font-size:3rem}
+}
